@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.log
+keys.env
+settings.json
+browser-profile/
+projects/
+*.mp4
