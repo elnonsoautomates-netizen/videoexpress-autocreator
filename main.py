@@ -1,4 +1,4 @@
-"""Start VideoExpress AutoCreator: local server + an app-style window (Edge/Chrome --app), falling back to the default browser."""
+"""Start VideoExpress AutoCreator in an app-style browser window."""
 from __future__ import annotations
 
 import os
@@ -70,6 +70,8 @@ def main():
     if not key_ok:
         print(f"  ! No key found for {s['provider']}. Add it to the keys file (or in Settings).")
     from .server import app
+    from .narrated import configure
+    configure(app)
     threading.Thread(target=lambda: (time.sleep(1.2), _app_window(url)), daemon=True).start()
     print(f"Running at {url}  (keep this window open; close it to quit)")
     app.run(host="127.0.0.1", port=PORT, debug=False, use_reloader=False, threaded=True)
