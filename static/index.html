@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VideoExpress AutoCreator</title>
+<style>
+:root{--bg:#0f1115;--panel:#171a21;--panel2:#1e222b;--line:#2a2f3a;--text:#e7e9ee;--muted:#9aa3b2;--acc:#f5a524;--acc2:#3b82f6;--ok:#22c55e;--bad:#ef4444;--warn:#eab308}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 "Segoe UI",system-ui,sans-serif;display:flex;height:100vh;overflow:hidden}
+aside{width:250px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column}
+.brand{padding:18px 16px 10px;font-weight:700;font-size:18px;letter-spacing:.3px}.brand span{color:var(--acc)}
+.brand small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+#plist{flex:1;overflow:auto;padding:6px}
+.pitem{padding:9px 10px;border-radius:8px;cursor:pointer;margin-bottom:2px}.pitem:hover{background:var(--panel2)}.pitem.on{background:#2a2414;outline:1px solid #5a4514}
+.pitem b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pitem small{color:var(--muted)}
+.side-btns{padding:10px;display:grid;gap:6px;border-top:1px solid var(--line)}
+main{flex:1;overflow:auto;padding:22px 28px 60px}
+button{background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit}
+button:hover{border-color:#4a5262}button.pri{background:var(--acc);color:#1a1200;border-color:var(--acc);font-weight:600}
+button.blue{background:var(--acc2);border-color:var(--acc2);color:#fff}button.danger{border-color:#7f1d1d;color:#fca5a5}
+button:disabled{opacity:.45;cursor:not-allowed}
+input,select,textarea{background:#0c0e12;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;width:100%}
+textarea{resize:vertical}label{display:block;color:var(--muted);font-size:12px;margin:10px 0 4px}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:22px 0 10px}.muted{color:var(--muted)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.grow{flex:1}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
+.steps{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:16px 0}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.step .t{font-weight:600;font-size:13px}.step .s{font-size:12px;color:var(--muted)}.step.done{border-color:#14532d}.step.done .t::before{content:"✔ ";color:var(--ok)}
+.step.cur{border-color:var(--acc)}
+.banner{background:#2a2414;border:1px solid #7a5b14;border-radius:10px;padding:12px 14px;margin:10px 0;display:flex;gap:12px;align-items:center}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-top:18px}.tab{padding:8px 14px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent}
+.tab.on{color:var(--text);border-color:var(--acc)}
+.log{background:#0a0c10;border:1px solid var(--line);border-radius:10px;padding:10px;font:12px/1.5 Consolas,monospace;height:300px;overflow:auto;white-space:pre-wrap}
+.scene{display:grid;grid-template-columns:54px 150px 1fr;gap:12px;padding:12px;border-bottom:1px solid var(--line)}
+.scene img{width:150px;height:84px;object-fit:cover;border-radius:6px;background:#000}.ph{width:150px;height:84px;border-radius:6px;background:#0a0c10;display:grid;place-items:center;color:var(--muted);font-size:11px}
+.badge{display:inline-block;font-size:11px;padding:1px 7px;border-radius:99px;background:var(--panel2);border:1px solid var(--line)}
+.badge.done{color:var(--ok);border-color:#14532d}.badge.rendering{color:var(--acc2);border-color:#1e3a8a}.badge.failed{color:var(--bad);border-color:#7f1d1d}
+.nar{color:var(--muted);font-style:italic;margin-bottom:6px}
+.bar{height:8px;background:var(--panel2);border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:var(--acc)}
+.tok{display:grid;grid-template-columns:90px 1fr;gap:8px;margin-bottom:6px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-start;justify-content:center;padding:40px;overflow:auto;z-index:9}
+.modal.on{display:flex}.modal .card{width:min(760px,100%)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.stat{font-size:22px;font-weight:700}.stats{display:flex;gap:28px}
+.hide{display:none}
+.tbtn{flex:1;text-align:left;padding:12px;border-radius:10px;line-height:1.35}.tbtn.on{border-color:var(--acc);background:#2a2414}
+.empty{display:grid;place-items:center;height:70vh;text-align:center}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">VideoExpress <span>AutoCreator</span> <small style="display:inline;font-size:11px" id="ver"></small><small>Script → VideoExpress video, on autopilot</small></div>
+  <div id="aiStatus" style="margin:0 10px 6px;padding:8px 10px;border-radius:8px;background:var(--panel2);font-size:12px;cursor:pointer" onclick="openSettings()"></div>
+  <div id="plist"></div>
+  <div class="side-btns">
+    <button class="pri" onclick="showNew()">＋ New video</button>
+    <button onclick="openSettings()">⚙ Settings</button>
+  </div>
+</aside>
+<main id="main"></main>
+
+<!-- new project -->
+<div class="modal" id="mNew"><div class="card">
+  <h1>New video</h1>
+  <label>What kind of video?</label>
+  <div class="row" id="nTypes" style="gap:8px">
+    <button class="tbtn" data-t="narrated" onclick="setType('narrated')">🎙 Narrated documentary<br><small class="muted">one narrator voice over scenes</small></button>
+    <button class="tbtn" data-t="dialogue" onclick="setType('dialogue')">🎬 Movie - characters talk<br><small class="muted">dialogue, own voice each, lip-synced</small></button>
+    <button class="tbtn" data-t="both" onclick="setType('both')">🎞 Narrator + talking scenes<br><small class="muted">story narrated, characters speak in key moments</small></button>
+  </div>
+  <input type="hidden" id="nType" value="narrated">
+  <div class="grid2">
+    <div><label>Topic / story idea (the AI writes the script or screenplay from this)</label><input id="nTopic" placeholder="e.g. The Battle of Blair Mountain, 1921  ·  A nurse in Lagos finds her missing father's letter" oninput="est()"></div>
+    <div class="row"><div class="grow"><label>Length (minutes)</label><input id="nMin" type="number" min="0.5" max="10" step="0.5" value="5" oninput="est()"></div>
+      <div class="grow"><label>Look</label><select id="nPreset"></select></div></div>
+    <div><label>Video name (also the file name) - optional</label><input id="nName" placeholder="defaults to the topic"></div>
+    <div><label>Extra notes for the AI - optional</label><input id="nNotes" placeholder="e.g. focus on the miners' side, end with a lesson, Nigerian setting"></div>
+  </div>
+  <details style="margin-top:10px" id="nRefBox"><summary style="cursor:pointer"><b>📚 Copy the formula of videos you like</b> <span class="muted">- paste their transcripts; the AI studies the hook, structure, pacing and CTAs and writes yours the same way (in its own words)</span></summary>
+    <textarea id="nRef" rows="7" placeholder="Paste one or more YouTube transcripts here (timestamps are fine - they are removed)"></textarea></details>
+  <details style="margin-top:8px" id="nScriptBox"><summary style="cursor:pointer"><b>✍ I already have my own script</b> <span class="muted">- paste it to use it word for word (leave empty and the AI writes it)</span></summary>
+    <label id="nLabel">Narration script</label><textarea id="nScript" rows="10" oninput="est()"></textarea></details>
+  <div class="row muted" id="nEst" style="margin-top:8px"></div>
+  <div class="row" style="margin-top:14px;justify-content:flex-end"><label style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="nStart" checked style="width:auto"> Start making it right away (Run everything)</label>
+    <button onclick="hide('mNew')">Cancel</button><button class="pri" onclick="createProject()">Create video</button></div>
+</div></div>
+
+<!-- settings -->
+<div class="modal" id="mSet"><div class="card">
+  <h1>Settings</h1>
+  <h2>AI brain (studies the script, writes prompts and SEO)</h2>
+  <div class="row"><button class="pri" onclick="openKeys()">🔑 Open my keys file</button><span class="muted grow">Easiest way: paste your keys into the keys file, save it, then close and reopen VideoExpress AutoCreator. Keys in that file override the boxes below.</span></div>
+  <div class="grid2">
+    <div><label>Mode</label><select id="s_provider">
+      <option value="groq">Groq API - main (fast, free key at console.groq.com/keys)</option>
+      <option value="claude">Claude API (Anthropic key)</option>
+      <option value="gemini">Gemini API (Google AI Studio key)</option>
+      <option value="manual">Manual - copy/paste with Claude.ai or ChatGPT (no key)</option>
+      <option value="offline">Offline - simple templates (lowest quality)</option></select></div>
+    <div class="row" style="align-items:flex-end"><button class="blue" onclick="testAI()">Test AI connection</button><span class="muted grow" id="aiTest"></span></div>
+    <div><label>Groq API key (starts with gsk_)</label><input id="s_groq_key" type="password"></div>
+    <div><label>Groq model</label><input id="s_groq_model" list="groqModels"><datalist id="groqModels">
+      <option value="openai/gpt-oss-120b">best quality</option><option value="llama-3.3-70b-versatile">higher free limit</option><option value="openai/gpt-oss-20b">fastest</option></datalist></div>
+    <div><label>Anthropic API key</label><input id="s_anthropic_key" type="password"></div>
+    <div><label>Claude model</label><input id="s_claude_model"></div>
+    <div><label>Gemini API key</label><input id="s_gemini_key" type="password"></div>
+    <div><label>Gemini model</label><input id="s_gemini_model"></div>
+  </div>
+  <h2>VideoExpress</h2>
+  <div class="grid2">
+    <div><label>Editor URL</label><input id="s_ve_url"></div>
+    <div><label>Browser</label><select id="s_browser_channel"><option value="chrome">Google Chrome</option><option value="msedge">Microsoft Edge</option><option value="chromium">Built-in Chromium</option></select></div>
+    <div><label>Narrator voice (exact name in VideoExpress Text to Speech; empty = ask)</label><input id="s_tts_voice" list="voices"><datalist id="voices">
+      <option>Andrew Multilingual</option><option>Aria</option><option>Davis</option><option>Guy</option><option>Jane</option><option>Jason</option><option>Jenny</option></datalist></div>
+    <div><label>Run everything</label><select id="s_autopilot"><option value="true">Autopilot - never stop to wait for me (recommended)</option><option value="false">Pause so I can review prompts / approve budget</option></select></div>
+    <div><label>Channel name for subscribe lines in AI scripts (optional)</label><input id="s_channel_name"></div>
+    <div><label>AI script writer checks facts on the web</label><select id="s_script_research"><option value="true">Yes (Groq compound / Gemini / Claude search)</option><option value="false">No</option></select></div>
+    <div><label>Dialogue voices</label><select id="s_dialogue_voice_mode"><option value="exact">Exact voices I pick + lip-sync (recommended)</option><option value="ai">Let the video AI voice the lines (from each voice description)</option></select></div>
+    <div><label>Default look</label><select id="s_preset" onchange="presetType()"></select></div>
+    <div><label>VideoExpress image type value <span id="typesHint"></span></label><input id="s_image_type" list="typeList"><datalist id="typeList"></datalist></div>
+    <div><label>Target scene length (s)</label><input id="s_scene_target" type="number"></div>
+    <div class="row"><div class="grow"><label>Min (s)</label><input id="s_scene_min" type="number"></div><div class="grow"><label>Max (s)</label><input id="s_scene_max" type="number"></div></div>
+    <div><label>Renders in parallel (VideoExpress allows 5)</label><input id="s_max_parallel" type="number"></div>
+    <div><label>Budget: max clips per video (stops and asks above this)</label><input id="s_max_clips" type="number"></div>
+    <div><label>Retries per failed scene</label><input id="s_image_retries" type="number"></div>
+    <div><label>Narrator speed for estimates (words/min)</label><input id="s_wpm" type="number"></div>
+    <div><label>Export limit (seconds)</label><input id="s_export_cap_seconds" type="number"></div>
+    <div><label>Save finished videos to</label><input id="s_download_dir"></div>
+  </div>
+  <h2>Music &amp; sound effects (step 7)</h2>
+  <div class="grid2">
+    <div><label>Background music</label><select id="s_music_mode">
+      <option value="auto">Auto - my music folder, else built-in mood music</option><option value="folder">Only my music folder</option>
+      <option value="builtin">Built-in mood music (made on your PC)</option><option value="off">No music</option></select></div>
+    <div><label>My music folder</label><div class="row"><input id="s_music_folder" class="grow" style="width:auto"><button onclick="api('/api/open_music_folder',{})">Open</button></div></div>
+    <div><label>Music level (% of the voice) - 10-20 = quiet under the voice</label><input id="s_music_level" type="number" min="1" max="100"></div>
+    <div><label>Lower the music while the narrator speaks</label><select id="s_duck"><option value="true">Yes (recommended)</option><option value="false">No</option></select></div>
+    <div><label>Sound effects (AI Sound Maker in VideoExpress, uses credits)</label><select id="s_sfx_on"><option value="true">On</option><option value="false">Off</option></select></div>
+    <div><label>Max sound effects per video</label><input id="s_sfx_max" type="number" min="0" max="30"></div>
+    <div><label>Sound effect level (% of the voice)</label><input id="s_sfx_level" type="number" min="1" max="100"></div>
+  </div>
+  <div class="row" style="margin-top:16px"><button class="blue" onclick="connectVE()">Open VideoExpress &amp; run free self-test</button>
+    <span class="muted grow">Opens a separate browser window (log in there yourself the first time), then checks every screen the app uses. Costs no credits.</span></div>
+  <div class="row" style="margin-top:14px;justify-content:flex-end"><button onclick="hide('mSet')">Close</button><button class="pri" onclick="saveSettings()">Save</button></div>
+</div></div>
+
+<script>
+const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let S={}, presets={}, ptypes={}, cur=null, P=null, tab='scenes', st={}, sceneFilter='all';
+const STAGES=['new','analysed','narrated','planned','prompted','rendered','exported','mixed'];
+const STEPS=[['analyse','1 · Study script','analysed'],['narrate','2 · Narration','narrated'],['plan','3 · Scene timing','planned'],
+  ['prompts','4 · Write prompts','prompted'],['render','5 · Render clips','rendered'],['assemble','6 · Edit & export','exported'],['sound','7 · Music & SFX','mixed']];
+async function api(u,body){const r=await fetch(u,body===undefined?{}:{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+  const j=await r.json().catch(()=>({})); if(!r.ok){alert(j.error||('Error '+r.status)); throw new Error(j.error)} return j}
+function show(id){$('#'+id).classList.add('on')} function hide(id){$('#'+id).classList.remove('on')}
+
+async function boot(){const j=await api('/api/settings'); S=j.settings; presets=j.presets; ptypes=j.preset_types;
+  const opts=Object.entries(presets).map(([k,v])=>`<option value="${k}">${v}</option>`).join(''); $('#nPreset').innerHTML=opts; $('#s_preset').innerHTML=opts;
+  await loadList(); const l=await api('/api/projects'); if(l.length) select(l[0].slug); else renderEmpty(); setInterval(tick,1500)}
+async function loadList(){const l=await api('/api/projects');
+  $('#plist').innerHTML=l.map(p=>`<div class="pitem ${p.slug===cur?'on':''}" onclick="select('${p.slug}')"><b>${esc(p.name)}</b><small>${p.stage}${p.scenes?` · ${p.done}/${p.scenes} clips`:''}</small></div>`).join('')||'<p class="muted" style="padding:10px">No videos yet.</p>'}
+function renderEmpty(){$('#main').innerHTML=`<div class="empty"><div><h1>Paste a script, get a finished video.</h1><p class="muted">VideoExpress AutoCreator studies your script, generates the narration in VideoExpress,<br>times every scene to the voice, writes the image and motion prompts, renders, edits and exports.</p>
+  <button class="pri" onclick="showNew()">＋ New video</button> <button onclick="openSettings()">⚙ Settings</button>
+  <div class="log" id="logBox" style="margin-top:20px;text-align:left;height:220px">${esc((st.log||[]).join('\n'))}</div></div></div>`}
+
+function showNew(){$('#nPreset').value=S.preset; setType('narrated'); show('mNew')}
+function setType(t){$('#nType').value=t; document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  $('#nLabel').textContent=t==='narrated'?'Narration script (exactly what the narrator says; headings like "## PART 1" are skipped)':'Script or screenplay (dialogue lines are kept word for word)'; est()}
+function est(){const ty=$('#nType').value, own=$('#nScript').value.trim(), m=+$('#nMin').value||5;
+  const w=(own.match(/\b\w[\w'’-]*\b/g)||[]).length;
+  if(ty==='narrated'){ const sec=own?w/(S.wpm||165)*60:m*60, sc=Math.round(sec/(S.scene_target||7));
+    $('#nEst').innerHTML=(own?`${w} words of your script · `:'AI writes ≈ '+Math.round(m*(S.wpm||165))+' words · ')+`≈ ${(sec/60).toFixed(1)} min · ≈ ${sc} scenes (${sc} images + ${sc} clips)${sec>S.export_cap_seconds?' · <b style="color:var(--warn)">longer than the 10-min export limit</b>':''}`; return}
+  const n=Math.round(m*60/6.5); $('#nEst').innerHTML=`🎬 Movie mode: the AI writes the screenplay, every character gets their own voice and talks on screen (lip-synced). ≈ ${n} shots · new keyframes only when the scene changes, the rest continue from the last frame.`}
+async function createProject(){const body={name:$('#nName').value,preset:$('#nPreset').value,script:$('#nScript').value,story_type:$('#nType').value,
+  minutes:+$('#nMin').value||5, topic:$('#nTopic').value, reference:$('#nRef').value, notes:$('#nNotes').value, start:$('#nStart').checked};
+  const p=await api('/api/projects',body);
+  hide('mNew'); ['#nScript','#nName','#nTopic','#nRef','#nNotes'].forEach(k=>$(k).value=''); tab='log'; await loadList(); select(p.slug)}
+async function select(slug){cur=slug; await loadList(); await refresh()}
+async function refresh(){if(!cur) return; P=await api('/api/project/'+cur); render()}
+function stageIdx(s){return STAGES.indexOf(s)}
+
+function render(){const si=stageIdx(P.stage), busy=st.busy, a=P.analysis||{}, sc=P.scenes||[];
+  const done=sc.filter(s=>s.status==='done').length;
+  let h=`<div class="row"><div class="grow"><h1>${esc(P.name)}</h1><div class="muted">${{narrated:'Narrated',dialogue:'Dialogue movie',both:'Narrator + dialogue'}[P.story_type||'narrated']} · ${presets[P.preset]||P.preset} · ${P.narration_s?`${(P.narration_s/60).toFixed(2)} min narration`:`≈ ${((P.estimate_s||0)/60).toFixed(1)} min (estimate)`}${sc.length?` · ${sc.length} scenes`:''}</div></div>
+   <button class="pri" ${busy?'disabled':''} onclick="run('all')">▶ Run everything</button><button class="danger" ${busy?'':'disabled'} onclick="api('/api/stop',{})">■ Stop</button></div>`;
+  if(st.waiting) h+=`<div class="banner"><div class="grow">⏸ ${esc(st.waiting)}</div><button class="pri" onclick="api('/api/continue',{})">Continue</button></div>`;
+  if(busy) h+=`<div class="card"><div class="row"><b class="grow">Working: ${esc(st.job)}</b><span class="muted">${st.progress.total?`${st.progress.label}: ${st.progress.done}/${st.progress.total}`:''}</span></div>${st.progress.total?`<div class="bar" style="margin-top:8px"><i style="width:${100*st.progress.done/st.progress.total}%"></i></div>`:''}</div>`;
+  const DLG=P.story_type==='dialogue'||P.story_type==='both';
+  const LBL=DLG?{analyse:'1 · Screenplay',narrate:'2 · Voices',plan:'3 · Shot timing',prompts:'4 · Shot prompts'}:{};
+  h+='<div class="steps">'+STEPS.map(([k,t0,need],i)=>{const t=LBL[k]||t0;const isDone=si>=stageIdx(need); const next=!isDone&&si>=stageIdx(need)-1;
+     let sub=isDone?'done':(next?'ready':'waiting'); if(k==='render'&&sc.length) sub=`${done}/${sc.length} clips`; if(k==='narrate'&&!DLG&&P.parts?.length) sub=`${P.parts.filter(x=>x.audio).length}/${P.parts.length} parts`; if(k==='narrate'&&DLG&&sc.length){const L=sc.filter(x=>x.line); sub=`${L.filter(x=>x.audio).length}/${L.length} lines`}
+     return `<div class="step ${isDone?'done':''} ${next?'cur':''}"><div class="t">${t}</div><div class="s">${sub}</div><button ${busy||(!isDone&&!next)?'disabled':''} onclick="run('${k}')">${isDone?'Redo':'Run'}</button></div>`}).join('')+'</div>';
+  if(P.manual) h+=manualBox();
+  if(sc.length && P.budget_ok===false) h+=`<div class="banner"><div class="grow">⚠ ${sc.length} clips is above your budget limit of ${S.max_clips}. Approve to continue, or shorten the script.</div><button class="pri" onclick="approveBudget()">Approve ${sc.length} clips</button></div>`;
+  if(P.export?.final) h+=`<div class="card" style="border-color:#14532d">🎵 <b>Final video with music &amp; sound effects:</b> <code>${esc(P.export.final)}</code></div>`;
+  if(P.export?.file) h+=`<div class="card" style="border-color:#14532d">✔ <b>Exported.</b> Saved to <code>${esc(P.export.file)}</code> (${(P.export.duration_s/60||0).toFixed(2)} min). Also saved in VideoExpress as “${esc(P.export_name||P.name)}”.</div>`;
+  h+=`<div class="tabs">${((P.story_type||'narrated')!=='narrated'?['scenes','characters','bible','sound','seo','script','log']:['scenes','bible','sound','seo','script','log']).map(t=>`<div class="tab ${tab===t?'on':''}" onclick="tab='${t}';render()">${{scenes:'Scenes',characters:'Characters & voices',bible:'Visual bible',sound:'Music & SFX',seo:'YouTube SEO',script:'Script & narration',log:'Log'}[t]}</div>`).join('')}
+     <div class="grow"></div><a href="/api/project/${cur}/pack.txt" style="color:var(--acc);align-self:center;padding:0 8px">⬇ Prompt pack (.txt)</a></div>`;
+  h+=`<div id="tabBody">${tabBody()}</div>`;
+  $('#main').innerHTML=h; const lg=$('#logBox'); if(lg) lg.scrollTop=lg.scrollHeight}
+
+function manualBox(){return `<div class="card" style="border-color:#1e3a8a"><b>Manual AI step - ${P.manual.step==='analysis'?'study the script':'write scene prompts'}</b>
+  <p class="muted">1) Copy this prompt. 2) Paste it into Claude.ai or ChatGPT. 3) Paste the whole reply below and press Save.</p>
+  <textarea rows="6" readonly id="mPrompt">${esc(P.manual.prompt)}</textarea>
+  <div class="row" style="margin:8px 0"><button class="blue" onclick="copyPrompt()">Copy prompt</button><span class="muted" id="copied"></span></div>
+  <textarea rows="6" id="mReply" placeholder="Paste the AI's JSON reply here"></textarea>
+  <div class="row" style="margin-top:8px;justify-content:flex-end"><button class="pri" onclick="sendManual()">Save reply</button></div></div>`}
+function copyPrompt(){navigator.clipboard.writeText($('#mPrompt').value).then(()=>$('#copied').textContent='Copied ✓',()=>{$('#mPrompt').select();document.execCommand('copy');$('#copied').textContent='Copied ✓'})}
+async function sendManual(){const r=await api(`/api/project/${cur}/manual`,{reply:$('#mReply').value}); alert(r.message); await refresh()}
+
+function tabBody(){const a=P.analysis||{}, sc=P.scenes||[];
+  if(tab==='sound') return soundTab();
+  if(tab==='characters') return charTab();
+  if(tab==='log') return `<div class="log" id="logBox">${esc((st.project===cur||!st.project?st.log:[]).join('\n'))}</div>`;
+  if(tab==='script') return scriptTab()+`<div class="card"><b>Narration parts</b> <span class="muted">(each part is one Text to Speech generation, max 2,400 characters)</span>${(P.parts||[]).map(x=>`<h2>Part ${x.k} ${x.duration?`· ${x.duration.toFixed(1)}s`:''} <span class="badge ${x.audio?'done':''}">${x.audio?'audio ready':'not generated'}</span></h2><div class="muted">${esc(x.text)}</div>`).join('')||'<p class="muted">Run step 1 first.</p>'}</div>`;
+  if(tab==='seo'){const s=a.seo||{}; return `<div class="card"><h2>Titles</h2>${(s.titles||[]).map(t=>`<div>• ${esc(t)}</div>`).join('')||'<p class="muted">Run step 1 (not available in Offline mode).</p>'}
+     <h2>Description</h2><textarea rows="9" readonly>${esc(s.description||'')}</textarea><h2>Tags</h2><textarea rows="3" readonly>${esc((s.tags||[]).join(', '))}</textarea>
+     <p>${esc((s.hashtags||[]).join(' '))}</p><h2>Thumbnail prompts</h2>${(a.thumbnails||[]).map((t,i)=>`<div class="card"><b>${i+1}. ${esc(t.concept)}</b> - overlay text: <b>${esc(t.text)}</b><div class="muted" style="margin-top:6px">${esc(t.prompt)}</div></div>`).join('')}</div>`}
+  if(tab==='bible'){ if(!P.analysis) return '<p class="muted">Run step 1 first.</p>';
+     return `<div class="card"><label>Style lock (added to every image)</label><textarea id="bStyle" rows="3">${esc(a.visual_style)}</textarea>
+     <label>Era / setting</label><input id="bEra" value="${esc(a.era_setting)}"><label>How sensitive moments are shown</label><input id="bSafe" value="${esc(a.safety)}">
+     <h2>Locked characters, groups and places</h2><p class="muted">Prompts use &lt;KEY&gt; and the app inserts this exact description every time, so people look the same in every scene.</p>
+     ${(a.tokens||[]).map((t,i)=>`<div class="tok"><input value="${esc(t.key)}" data-i="${i}" class="tk"><textarea rows="2" data-i="${i}" class="tl">${esc(t.look)}</textarea></div>`).join('')}
+     <div class="row" style="justify-content:flex-end"><button onclick="addTok()">＋ Add</button><button class="pri" onclick="saveBible()">Save bible</button></div></div>`}
+  // scenes
+  if(!sc.length) return '<p class="muted" style="margin-top:16px">Scenes appear after the narration is generated and timed (steps 2–3).</p>';
+  const f=s=>sceneFilter==='all'||s.status===sceneFilter;
+  return `<div class="row" style="margin:12px 0"><span class="muted">Show:</span>${['all','pending','rendering','done','failed'].map(x=>`<button ${sceneFilter===x?'class="blue"':''} onclick="sceneFilter='${x}';render()">${x} (${x==='all'?sc.length:sc.filter(s=>s.status===x).length})</button>`).join('')}</div>`+
+   sc.filter(f).map(s=>`<div class="scene"><div><b>#${s.n}</b><div class="muted">${s.start}s<br>${s.len}s</div><span class="badge ${s.status}">${s.status}</span></div>
+     <div>${s.preview?`<img src="${s.preview}" loading="lazy">`:'<div class="ph">no keyframe yet</div>'}</div>
+     <div><div class="nar">${(P.story_type||'narrated')!=='narrated'?esc(s.text):'“'+esc(s.text)+'”'}</div>
+       ${(P.story_type||'narrated')!=='narrated'?`<div class="grid2"><div><label>Spoken line ${s.speaker?'('+esc(s.speaker)+')':'(silent shot)'} - editing re-makes the voice</label><input id="ln${s.n}" value="${esc(s.line||'')}"></div>
+         <div><label>Delivery</label><input id="dl${s.n}" value="${esc(s.delivery||'')}"></div></div>
+         <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="co${s.n}" style="width:auto" ${s.continue?'checked':''}> Continue from the previous clip's last frame (no new keyframe)</label>`:''}
+       ${s.error?`<div style="color:var(--bad);font-size:12px">Last problem: ${esc(s.error)}</div>`:''}
+       <label>Image (use &lt;KEY&gt; tokens)${s.continue?' - not used while "continue" is ticked':''}</label><textarea rows="2" id="im${s.n}">${esc(s.image||'')}</textarea>
+       <div class="grid2"><div><label>Video setting</label><input id="cx${s.n}" value="${esc(s.ctx||'')}"></div>
+       <div><label>Shots (CAMERA: action, one per line)</label><textarea rows="2" id="sh${s.n}">${esc((s.shots||[]).map(x=>x.camera+': '+x.action).join('\n'))}</textarea></div></div>
+       <div class="row" style="margin-top:6px"><button onclick="saveScene(${s.n},false)">Save</button><button onclick="saveScene(${s.n},true)" title="Discard this scene's keyframe/clip and render it again">Save & redo scene</button>
+       <details class="grow"><summary class="muted" style="cursor:pointer">final prompts</summary><div class="muted" style="white-space:pre-wrap;font-size:12px">${esc(s.full_image||'')}\n\n${esc(s.full_video||'')}</div></details></div></div></div>`).join('')}
+
+const MOODS=['tense','dark','epic','sad','hopeful','mysterious','calm','reverent'];
+let musicFiles=null;
+function soundTab(){const snd=P.sound;
+  if(!P.scenes?.length) return '<p class="muted" style="margin-top:16px">Music and sound effects are planned after the scenes exist (steps 1-4), and mixed after export (step 7).</p>';
+  if(musicFiles===null){musicFiles=[]; api('/api/music_files').then(j=>{musicFiles=j.files; if(tab==='sound') render()})}
+  const mf=P.music_file||'';
+  let h=`<div class="card"><div class="grid2"><div><label>Music for this video</label><select id="sdMusic">
+    <option value="" ${!mf?'selected':''}>Automatic (from Settings)</option>${musicFiles.map(f=>`<option value="${esc(f)}" ${mf===f?'selected':''}>${esc(f.split(/[\\/]/).pop())}</option>`).join('')}</select></div>
+    <div><label>Mood</label><select id="sdMood">${MOODS.map(m=>`<option ${snd?.mood===m?'selected':''}>${m}</option>`).join('')}</select></div></div>
+    ${P.music_used?`<p class="muted">Last mix used: ${esc(P.music_used.split(/[\\/]/).pop())}</p>`:''}</div>`;
+  if(!snd) return h+`<div class="card"><p class="muted">No sound plan yet. Step 7 plans it automatically, or plan it now and edit it before mixing.</p><button class="pri" ${st.busy?'disabled':''} onclick="run('sound')">Plan &amp; make sounds now</button></div>`;
+  h+=`<div class="card"><div class="row"><b class="grow">Sound effects (${snd.sfx.length})</b><button onclick="addCue()">＋ Add effect</button><button onclick="saveSound(true)">Re-plan with AI</button><button class="pri" onclick="saveSound()">Save</button></div>
+   <p class="muted">Each effect is made with VideoExpress' AI Sound Maker (2-7 s) and placed at its second. Untick to skip one.</p>
+   ${snd.sfx.map((c,i)=>`<div class="row" style="margin:6px 0"><input type="checkbox" class="cuOn" data-i="${i}" ${c.enabled!==false?'checked':''} style="width:auto">
+     <input class="cuAt" data-i="${i}" type="number" step="0.1" value="${c.at}" style="width:90px" title="second"><input class="cuP grow" data-i="${i}" value="${esc(c.prompt)}" style="width:auto">
+     <input class="cuS" data-i="${i}" type="number" min="2" max="7" value="${c.seconds}" style="width:70px" title="length (s)">
+     <select class="cuL" data-i="${i}" style="width:100px"><option ${c.level!=='medium'?'selected':''}>low</option><option ${c.level==='medium'?'selected':''}>medium</option></select>
+     <span class="badge ${c.file?'done':c.error?'failed':''}">${c.file?'ready':c.error?'failed':'to make'}</span></div>`).join('')}</div>`;
+  return h}
+function addCue(){P.sound.sfx.push({n:1,at:0,prompt:'',seconds:4,level:'low',enabled:true}); render()}
+async function saveSound(replan){const snd=P.sound||{sfx:[]}; const sfx=snd.sfx.map((c,i)=>({n:nearestScene(+document.querySelector(`.cuAt[data-i="${i}"]`).value),
+   at:+document.querySelector(`.cuAt[data-i="${i}"]`).value, prompt:document.querySelector(`.cuP[data-i="${i}"]`).value, seconds:+document.querySelector(`.cuS[data-i="${i}"]`).value,
+   level:document.querySelector(`.cuL[data-i="${i}"]`).value, enabled:document.querySelector(`.cuOn[data-i="${i}"]`).checked})).filter(c=>c.prompt.trim());
+  await api(`/api/project/${cur}/sound`,{replan:!!replan, mood:$('#sdMood')?.value, music_file:$('#sdMusic')?.value||'', sfx}); await refresh()}
+function nearestScene(t){let n=1; for(const s of P.scenes){ if((s.t_start??s.start)<=t) n=s.n } return n}
+async function saveScene(n,redo){const shots=$('#sh'+n).value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const i=l.indexOf(':');return i>0?{camera:l.slice(0,i).trim(),action:l.slice(i+1).trim()}:{camera:'MEDIUM SHOT',action:l}}).slice(0,2);
+  const body={image:$('#im'+n).value,ctx:$('#cx'+n).value,shots,redo};
+  if($('#ln'+n)){body.line=$('#ln'+n).value; body.delivery=$('#dl'+n).value; body.continue=$('#co'+n).checked}
+  await api(`/api/project/${cur}/scene/${n}`,body); await refresh()}
+function scriptTab(){const f=P.formula, locked=stageIdx(P.stage)>=stageIdx('narrated');
+  return `<div class="card"><div class="row"><b class="grow">Script ${P.script_ai?'<span class="badge done">written by AI</span>':''}</b>
+    ${P.topic&&!locked?`<button ${st.busy?'disabled':''} onclick="if(confirm('Write a new script for: ${esc(P.topic).replace(/'/g,'')}?')) run('script')">✨ ${P.script?'Rewrite':'Write'} with AI</button>`:''}
+    ${!locked?'<button class="pri" onclick="saveScript()">Save script</button>':''}</div>
+    ${P.topic?`<p class="muted">Topic: ${esc(P.topic)}${P.notes?' · Notes: '+esc(P.notes):''}</p>`:''}
+    ${(!P.script&&(P.story_type||'narrated')!=='narrated'&&P.scenes?.length)?`<p class="muted">Screenplay written by the AI (edit lines in the Scenes tab):</p><textarea rows="14" readonly>${esc(P.scenes.map(s=>'#'+s.n+'  '+s.text).join('\n'))}</textarea>`:`<textarea id="scriptBox" rows="14" ${locked?'readonly':''}>${esc(P.script||'')}</textarea>`}
+    ${locked?'<p class="muted">The narration was made from this script, so it is locked.</p>':''}
+    ${f?`<details><summary style="cursor:pointer"><b>Formula learned from your reference transcripts</b></summary><p>${esc(f.summary||'')}</p><p><b>Hook:</b> ${esc(f.hook||'')}</p>
+      <ol>${(f.structure||[]).map(x=>`<li><b>${esc(x.section)}</b> (${esc(x.share||'')}) - ${esc(x.purpose||'')}</li>`).join('')}</ol><p><b>Voice:</b> ${esc(f.voice||'')}</p><p><b>CTA:</b> ${esc(f.cta||'')}</p></details>`:''}</div>`}
+async function saveScript(){await api(`/api/project/${cur}/update`,{script:$('#scriptBox').value}); await refresh()}
+let VOICES=null;
+function charTab(){const a=P.analysis; if(!a) return '<p class="muted" style="margin-top:16px">Characters appear after step 1 (Screenplay).</p>';
+  if(VOICES===null){VOICES=[]; api('/api/voices').then(v=>{VOICES=v; if(tab==='characters') render()})}
+  const chars=a.tokens.filter(t=>t.kind==='character'); const lines=k=>(P.scenes||[]).filter(s=>s.speaker===k).length;
+  const opt=cur=>VOICES.map(v=>`<option value="${esc(v.id)}" ${v.id===cur?'selected':''}>${esc(v.name)}${v.kind?' · '+v.kind:''}</option>`).join('');
+  return `<div class="card"><p class="muted">Each character speaks with their own VideoExpress voice in every scene. Change a voice and press Save: only that character's lines are re-made (step 2). Narrator voice: ${esc(S.tts_voice||'')} (Settings). Run the free self-test once to load every voice your account has.</p>
+   ${chars.map(t=>`<div class="card" style="margin:8px 0"><div class="row"><b class="grow">${esc(t.name)} &lt;${esc(t.key)}&gt;</b><span class="muted">${lines(t.key)} lines · ${esc(t.gender||'')} ${esc(t.age||'')}</span></div>
+     <div class="grid2"><div><label>Voice</label><select class="chV" data-k="${esc(t.key)}">${opt(t.voice)}</select></div>
+     <div><label>Voice description (used in AI-voice mode)</label><input class="chH" data-k="${esc(t.key)}" value="${esc(t.voice_hint||'')}"></div></div>
+     <label>Look (locked in every image)</label><textarea class="chL" data-k="${esc(t.key)}" rows="2">${esc(t.look)}</textarea></div>`).join('')||'<p class="muted">No speaking characters found.</p>'}
+   <div class="row" style="justify-content:flex-end"><button class="pri" onclick="saveChars()">Save characters</button></div></div>`}
+async function saveChars(){const out=[...document.querySelectorAll('.chV')].map(e=>{const k=e.dataset.k; return {key:k, voice:e.value,
+  voice_hint:document.querySelector(`.chH[data-k="${k}"]`).value, look:document.querySelector(`.chL[data-k="${k}"]`).value}});
+  const r=await api(`/api/project/${cur}/characters`,{characters:out}); if(r.changed?.length) alert('Voice changed for '+r.changed.join(', ')+'. Run step 2 (Voices) to re-make their lines.'); await refresh()}
+function addTok(){P.analysis.tokens.push({key:'NEW',name:'',look:''}); render()}
+async function saveBible(){const a=P.analysis; a.visual_style=$('#bStyle').value; a.era_setting=$('#bEra').value; a.safety=$('#bSafe').value;
+  document.querySelectorAll('.tk').forEach(e=>a.tokens[e.dataset.i].key=e.value.toUpperCase().replace(/[^A-Z0-9_]/g,''));
+  document.querySelectorAll('.tl').forEach(e=>a.tokens[e.dataset.i].look=e.value); a.tokens=a.tokens.filter(t=>t.key&&t.look);
+  await api(`/api/project/${cur}/update`,{analysis:a}); await refresh()}
+async function approveBudget(){await api(`/api/project/${cur}/update`,{budget_ok:true}); await refresh()}
+async function run(step){if(step==='sound'&&S.sfx_on&&!confirm('Make the sound effects and mix the music? Sound effects use VideoExpress credits (one AI Sound Maker generation each).')) return;
+  if(step==='render'&&!confirm('Start rendering? This uses VideoExpress credits (one image + one clip per scene).')) return;
+  const r=await api(`/api/project/${cur}/step/${step}`,{}); if(r.message) alert(r.message); tab=step==='plan'?'scenes':'log'; await refresh(); tick()}
+
+let lastBusy=false, lastLen=0;
+async function tick(){try{st=await api('/api/status')}catch(e){return}
+  const changed=st.busy!==lastBusy||st.log.length!==lastLen; lastLen=st.log.length;
+  if(st.busy!==lastBusy){lastBusy=st.busy; await loadList(); await refresh(); return}
+  if(changed&&(!cur||tab==='log')){const lg=$('#logBox'); if(lg){lg.textContent=(st.project===cur||!st.project)?st.log.join('\n'):''; lg.scrollTop=lg.scrollHeight}}
+  const typing=['TEXTAREA','INPUT','SELECT'].includes(document.activeElement?.tagName);
+  if(cur && P && !typing && (st.waiting||st.busy)){ if(!window._rt||Date.now()-window._rt>6000){window._rt=Date.now(); const y=$('main').scrollTop; await refresh(); $('main').scrollTop=y} }}
+
+function openSettings(){for(const [k,v] of Object.entries(S)){const e=$('#s_'+k); if(e) e.value=(typeof v==='boolean')?String(v):v}
+  api('/api/image_types').then(t=>{ $('#typeList').innerHTML=t.map(x=>`<option value="${esc(x.v)}">${esc(x.t)}</option>`).join(''); $('#typesHint').textContent=t.length?'(detected: '+t.map(x=>x.v).join(', ')+')':'(open VideoExpress once to detect the options)'}); show('mSet')}
+function presetType(){const t=ptypes[$('#s_preset').value]; if(t) $('#s_image_type').value=t}
+async function saveSettings(keepOpen){const o={}; for(const k of Object.keys(S)){const e=$('#s_'+k); if(e) o[k]=e.type==='number'?Number(e.value):e.value}
+  const j=await api('/api/settings',o); S=j.settings; aiStatus(); if(!keepOpen) hide('mSet')}
+async function openKeys(){await api('/api/open_keys',{}); alert('The keys file opened in Notepad. Paste your keys after the = signs, press Ctrl+S, then close and reopen VideoExpress AutoCreator.')}
+async function aiStatus(){try{const v=await api('/api/version'); $('#ver').textContent='v'+v.version;
+  $('#aiStatus').innerHTML=`AI: <b>${esc(v.provider)}</b>${v.model?` · ${esc(v.model)}`:''}<br>${v.has_key?'<span style="color:var(--ok)">key found ✔</span>':'<span style="color:var(--bad)">no key - click to add</span>'}`}catch(e){}}
+async function testAI(){$('#aiTest').textContent='Testing…'; await saveSettings(true);
+  try{const r=await fetch('/api/test_ai',{method:'POST'}); const j=await r.json(); $('#aiTest').textContent=j.message||('✖ '+j.error)}catch(e){$('#aiTest').textContent='✖ '+e}}
+async function connectVE(){await saveSettings(true); await api('/api/browser',{}); hide('mSet'); tab='log'; if(cur) refresh(); else renderEmpty()}
+boot(); aiStatus();
+</script>
+</body>
+</html>
